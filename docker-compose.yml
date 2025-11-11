@@ -1,0 +1,29 @@
+services:
+  lean:
+    build: ./lean-core
+    volumes:
+      - ./data:/Data
+      - ./lean-core:/Lean
+    environment:
+      - LEAN_DATA_DIRECTORY=/Data
+    stdin_open: true
+    tty: true
+
+  rebate:
+    build: ./services/rebate
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./services/rebate:/app
+    environment:
+      - STREAMLIT_SERVER_PORT=8501
+      - STREAMLIT_SERVER_ADDRESS=0.0.0.0
+
+  strategy:
+    build: ./services/strategy
+    volumes:
+      - ./data:/app/data
+      - ./services/strategy:/app
+    depends_on:
+      - lean
+
