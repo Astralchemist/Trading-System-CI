@@ -10,7 +10,7 @@ on:
 
 jobs:
   lint-python:
-    name: Lint Python (sandbox-rebate)
+    name: Lint Python (rebate)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
@@ -36,12 +36,14 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
+        with:
+          submodules: true
 
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
 
       - name: Build Lean Docker image
-        run: docker build -t lean-test ./lean-core
+        run: docker build -t lean-test ./lean-core/Lean
 
   sandbox-docker-build:
     name: Build Rebate Sandbox Docker
