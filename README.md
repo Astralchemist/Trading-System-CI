@@ -102,6 +102,26 @@ docker-compose up rebate
 - **Lean Engine**: Running in background (check logs: `docker-compose logs lean`)
 - **Strategy Generator**: Run via `docker-compose run strategy`
 
+### 5. Running Backtests (Using Utility Scripts)
+
+The repository includes helpful utility scripts in the `scripts/` directory:
+
+```bash
+# Interactive menu to select and run algorithms
+./scripts/backtest_menu.sh
+
+# Or run a specific algorithm directly
+./scripts/run_backtest.sh algorithms/SimpleBuyAndHold.py
+
+# View backtest results
+./scripts/view_results.sh
+
+# Download sample market data
+./scripts/download_sample_data.sh
+```
+
+These scripts handle Docker exec commands and result parsing automatically.
+
 ## 🔧 Development
 
 ### Running Individual Services
@@ -201,6 +221,68 @@ docker-compose run rebate python -m pytest
 # View lean logs
 docker-compose logs -f lean
 ```
+
+## 🖼️ Screenshots
+
+### Rebate Optimization Sandbox
+![Rebate Optimization UI](docs-rebate-ui.png)
+
+The interactive Streamlit interface allows you to optimize trading rebate parameters using Optuna hyperparameter optimization.
+
+## ⚠️ Known Issues & Troubleshooting
+
+![Docker Errors Example](docs-docker-errors.png)
+
+### Common Issues
+
+#### 1. **Anthropic API Credit Error (400)**
+```
+Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error',
+'message': 'Your credit balance is too low to access the Anthropic API.'}}
+```
+**Solution**:
+- Add credits to your Anthropic account at https://console.anthropic.com/
+- Or set up a valid API key with available credits in your `.env` file
+- The strategy generator service requires API credits to function
+
+#### 2. **Permission Denied Error on Strategy Generation**
+```
+PermissionError: [Errno 13] Permission denied: '/app/generated/strategy_1.py'
+```
+**Solution**:
+- This was fixed in the latest Docker configuration
+- The `services/strategy/Dockerfile` now creates the `generated/` directory with proper permissions
+- Rebuild the container: `docker-compose build strategy`
+
+#### 3. **Lean Engine Configuration Errors**
+```
+UnhandledExceptionEventArgs: Unrecognized command or argument 'tail'
+at QuantConnect.Configuration.ApplicationParser.ParseArguments
+```
+**Solution**:
+- These errors occur when the Lean container uses `tail -f /dev/null` as a keep-alive command
+- This is intentional - the Lean engine is now designed to stay running so you can exec backtests into it
+- To run a backtest, use: `docker-compose exec lean dotnet /Lean/Launcher/bin/Release/QuantConnect.Lean.Launcher.dll`
+- Or use the provided utility scripts in `scripts/` directory
+
+#### 4. **Missing Lean DLL or Build Issues**
+**Solution**:
+- Ensure the Lean submodule is initialized: `git submodule update --init --recursive`
+- Rebuild the lean-core container: `docker-compose build lean --no-cache`
+- The Dockerfile now includes proper build steps with `dotnet restore` and `dotnet build`
+
+#### 5. **Volume Mount Issues**
+**Solution**:
+- The docker-compose.yml now uses selective volume mounts
+- If you need to develop Lean algorithms, uncomment the development volume mounts in docker-compose.yml
+- For production use, keep the default configuration to preserve built DLLs
+
+### Getting Help
+If you encounter other issues:
+1. Check the logs: `docker-compose logs -f [service-name]`
+2. Rebuild containers: `docker-compose build --no-cache`
+3. Check that all environment variables are set in `.env`
+4. Verify the Lean submodule is properly initialized
 
 ## 📝 Project Status
 
