@@ -1,0 +1,41 @@
+# Environment variables (contains secrets!)
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv
+
+# Docker
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Generated files
+services/strategy/generated/
+*.pyc
+*.pyo
+
+# Data files
+data/
+*.csv
+*.json
+*.db
+
+# Temporary files
+*.tmp
+*.temp
