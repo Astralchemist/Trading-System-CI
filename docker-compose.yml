@@ -3,27 +3,43 @@ services:
     build: ./lean-core
     volumes:
       - ./data:/Data
-      - ./lean-core:/Lean
+      # Only mount data directory, not the entire Lean source (to preserve built DLLs)
+      # Uncomment below for development to live-edit algorithms:
+      # - ./lean-core/Algorithm.Python:/Lean/Algorithm.Python
     environment:
       - LEAN_DATA_DIRECTORY=/Data
+    env_file:
+      - .env
     stdin_open: true
     tty: true
+    # Keep container running so we can exec backtests into it
+    command: tail -f /dev/null
 
   rebate:
     build: ./services/rebate
     ports:
       - "8501:8501"
     volumes:
-      - ./services/rebate:/app
+      # Mount only the app code for live reload, not the entire directory
+      - ./services/rebate/app.py:/app/app.py
     environment:
       - STREAMLIT_SERVER_PORT=8501
       - STREAMLIT_SERVER_ADDRESS=0.0.0.0
+    env_file:
+      - .env
 
   strategy:
     build: ./services/strategy
     volumes:
       - ./data:/app/data
-      - ./services/strategy:/app
+      # Mount generated strategies directory to persist output
+      - ./services/strategy/generated:/app/generated
+      # Optionally mount source for development:
+      # - ./services/strategy/generate.py:/app/generate.py
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+    env_file:
+      - .env
     depends_on:
       - lean
 

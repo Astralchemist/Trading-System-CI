@@ -18,7 +18,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Create non-root user
-RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
+RUN useradd -m -u 1000 appuser
+
+# Create directories that need write access and set ownership
+RUN mkdir -p /app/generated && chown -R appuser:appuser /app
+
 USER appuser
 
 # Default command
