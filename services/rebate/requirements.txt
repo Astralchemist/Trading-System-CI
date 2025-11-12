@@ -2,3 +2,4 @@ streamlit
 optuna
 pandas
 numpy
+plotly
