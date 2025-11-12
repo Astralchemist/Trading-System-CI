@@ -1,0 +1,3 @@
+[submodule "lean-core/Lean"]
+	path = lean-core/Lean
+	url = https://github.com/QuantConnect/Lean.git
