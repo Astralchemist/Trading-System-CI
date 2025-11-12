@@ -11,8 +11,13 @@ COPY ./Lean /Lean
 # Install Python debugging tools
 RUN pip install --no-cache-dir debugpy ptvsd pydevd-pycharm
 
-# Set working directory to launcher
-WORKDIR /Lean/Launcher/bin/Debug
+# Restore NuGet packages and build the Lean engine
+RUN dotnet restore /Lean/QuantConnect.Lean.sln && \
+    dotnet build /Lean/QuantConnect.Lean.sln -c Release --no-restore
 
-# Entry point for Lean engine
-ENTRYPOINT [ "dotnet", "QuantConnect.Lean.Launcher.dll" ]
+# Verify the DLL exists and list the output directory
+RUN ls -la /Lean/Launcher/bin/Release/ || echo "Build output not found"
+
+# Entry point for Lean engine - run from /Lean root with explicit path
+WORKDIR /Lean
+ENTRYPOINT [ "dotnet", "/Lean/Launcher/bin/Release/QuantConnect.Lean.Launcher.dll" ]
